@@ -3,6 +3,24 @@ import { createCard, deleteCard, toggleLikeCard, placesCardsList } from './compo
 import { initialCards } from './components/initialCardsMockData';
 import { closePopup, closePopupClickOnOverlay, openPopup } from './components/modal';
 import avatar from '../images/avatar.jpg';
+import { clearValidation, enableValidation } from './components/validation';
+import { getCardsFromApi, getUserData, refreshUserData } from './components/api';
+
+
+
+
+
+
+const validationConfig = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'form__submit_inactive',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'form__input-error_active'
+};
+
+
 
 
 const profileImage = document.querySelector('.profile__image');
@@ -29,15 +47,26 @@ const imageNameInPopup = imageViewerPopup.querySelector('.popup__caption');
 const allPopups = document.querySelectorAll('.popup');
 const allPopupCloseButtons = document.querySelectorAll('.popup__close');
 
+enableValidation(validationConfig)
+
+const renderUserData = (data) => {
+  profileName.textContent = data.name
+  profileJob.textContent = data.about
+}
+
+
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-
   const nameValue = profileNameInput.value;
   const jobValue = profileJobInput.value;
+  refreshUserData(nameValue, jobValue)
+    .then((res) => {
+      renderUserData(res)
+    }).catch((err) => {
+      console.log(err)
+    })
+}
 
-  profileName.textContent = nameValue;
-  profileJob.textContent = jobValue;
-};
 
 const handleAddCardFormSubmit = (evt) => {
   evt.preventDefault();
@@ -66,9 +95,6 @@ const openImageInPopup = (evt) => {
   openPopup(imageViewerPopup);
 };
 
-initialCards.forEach((card) => {
-  placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard));
-});
 
 allPopupCloseButtons.forEach((closeButton) => {
   closeButton.addEventListener('click', (evt) => {
@@ -82,125 +108,43 @@ allPopups.forEach((popup) => {
 });
 
 profileEditButton.addEventListener('click', () => {
+  clearValidation(profileEditForm, validationConfig)
   fillProfileInputs();
   openPopup(profileEditPopup);
 });
 
-addNewCardButton.addEventListener('click', () => { 
+addNewCardButton.addEventListener('click', () => {
+  clearValidation(addNewCardForm, validationConfig)
   addNewCardForm.reset()
-  openPopup(addNewCardPopup)});
+  openPopup(addNewCardPopup)
+
+});
 
 profileEditForm.addEventListener('submit', (evt) => {
-  handleProfileFormSubmit(evt);
+  handleProfileFormSubmit(evt)
   closePopup(profileEditPopup);
 });
 
 addNewCardForm.addEventListener('submit', (evt) => {
   handleAddCardFormSubmit(evt);
   closePopup(addNewCardPopup);
-  addNewCardForm.reset();
+
 });
 
+const promises = [getUserData(), getCardsFromApi()]
 
-
-
-
-
-const showInputError = (formElement, inputElement, errorMessage) => {
-  const formError = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.add('popup__input_type_error');
-  formError.textContent = errorMessage
-  formError.classList.add('form__input-error_active');
-};
-
-// Функция, которая удаляет класс с ошибкой
-const hideInputError = (formElement, inputElement) => {
-  const formError = formElement.querySelector(`.${inputElement.id}-error`);
-  inputElement.classList.remove('popup__input_type_error');
-  formError.classList.remove('form__input-error_active');
-  formError.textContent = ''
-};
-
-const isValid = (formElement, inputElement) => {
-  if (inputElement.validity.patternMismatch) {
-    // данные атрибута доступны у элемента инпута через ключевое слово dataset.
-    // обратите внимание, что в js имя атрибута пишется в camelCase (да-да, в
-    // HTML мы писали в kebab-case, это не опечатка)
-    inputElement.setCustomValidity(inputElement.dataset.errorMessage);
-  } else {
-    inputElement.setCustomValidity("");
-  }
-  if (!inputElement.validity.valid) {
-    // Если поле не проходит валидацию, покажем ошибку
-    showInputError(formElement, inputElement, inputElement.validationMessage);
-  } else {
-    // Если проходит, скроем
-    hideInputError(formElement, inputElement,);
-  }
-};
-
-const setEventListeners = (formElement) => {
-  // Находим все поля внутри формы,
-  // сделаем из них массив методом Array.from
-  const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
-  const buttonElement = formElement.querySelector('.popup__button')
-  toggleButtonState(inputList, buttonElement)
-  // Обойдём все элементы полученной коллекции
-  inputList.forEach((inputElement) => {
-    // каждому полю добавим обработчик события input
-    inputElement.addEventListener('input', () => {
-      // Внутри колбэка вызовем isValid,
-      // передав ей форму и проверяемый элемент
-      isValid(formElement, inputElement)
-      toggleButtonState(inputList, buttonElement)
-    });
-  });
-};
-
-const enableValidation = () => {
-  // Найдём все формы с указанным классом в DOM,
-  // сделаем из них массив методом Array.from
-  const formList = Array.from(document.querySelectorAll('.popup__form'));
-
-  // Переберём полученную коллекцию
-  formList.forEach((formElement) => {
-    // Для каждой формы вызовем функцию setEventListeners,
-    // передав ей элемент формы
-    setEventListeners(formElement);
-  });
-};
-
-// Вызовем функцию
-enableValidation();
-
-
-// Функция принимает массив полей
-
-function hasInvalidInput(inputList) {
-  // проходим по этому массиву методом some
-  return inputList.some((inputElement) => {
-    // Если поле не валидно, колбэк вернёт true
-    // Обход массива прекратится и вся функция
-    // hasInvalidInput вернёт true
-
-    return !inputElement.validity.valid;
+Promise.all(promises)
+  .then(([userData, cards]) => {
+    cards.forEach((card) => {
+      placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard));
+    })
+    renderUserData(userData)
   })
-};
+  .catch((err) => {
+    console.log(err)
+  })
 
-// Функция принимает массив полей ввода
-// и элемент кнопки, состояние которой нужно менять
 
-function toggleButtonState(inputList, buttonElement) {
-  // Если есть хотя бы один невалидный инпут
-  if (hasInvalidInput(inputList)) {
-    // сделай кнопку неактивной
-    buttonElement.disabled = true;
-    buttonElement.classList.add('form__submit_inactive');
-  } else {
-    // иначе сделай кнопку активной
-    buttonElement.disabled = false;
-    buttonElement.classList.remove('form__submit_inactive');
-  }
-};
+
 
 

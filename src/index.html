@@ -24,9 +24,9 @@
           <div class="profile__image"></div>
 
           <div class="profile__info">
-            <h1 class="profile__title">Жак-Ив Кусто</h1>
+            <h1 class="profile__title"></h1>
             <button class="profile__edit-button" type="button"></button>
-            <p class="profile__description">Исследователь океана</p>
+            <p class="profile__description"></p>
           </div>
           <button class="profile__add-button" type="button"></button>
         </section>
@@ -51,7 +51,10 @@
               required
               minlength="2"
               maxlength="40"
-              pattern="a-zA-Zа-яА-ЯёЁ\s-+"
+              pattern="^[\s\-a-zA-Zа-яА-ЯёЁ]+$"
+
+
+
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
             />
             <span class="popup__input_type_name-error"></span>
@@ -64,7 +67,9 @@
               required
               minlength="2"
               maxlength="200"
-              pattern="a-zA-Zа-яА-ЯёЁ\s-+"
+              pattern="^[A-Za-zА-Яа-яёЁ\s\-]+$"
+
+
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
             />
             <span class="form__input-error popup__input_type_description-error"></span>
@@ -86,7 +91,9 @@
               required
               minlength="2"
               maxlength="30"
-              pattern="a-zA-Zа-яА-ЯёЁ\s-+"
+              pattern="^[A-Za-zА-Яа-яёЁ\s\-]+$"
+
+
               data-error-message="Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы"
             />
             <span class="popup__input_type_card-name-error"></span>
@@ -124,5 +131,3 @@
     </template>
   </body>
 </html>
-
-

@@ -5,9 +5,7 @@ import { closePopup, closePopupClickOnOverlay, openPopup } from './components/mo
 import { clearValidation, enableValidation } from './components/validation';
 import { getCardsFromApi, getUserData, refreshUserData, sendCardToApi, refreshUserAvatar } from './components/api';
 
-
 let userId = null
-
 
 
 const validationConfig = {
@@ -18,6 +16,7 @@ const validationConfig = {
   inputErrorClass: 'popup__input_type_error',
   errorClass: 'form__input-error_active'
 };
+
 
 
 
@@ -32,34 +31,9 @@ const profileAvatar = document.querySelector('.profile__image');
 const profileAvatarPopup = document.querySelector('.popup_avatar_changed')
 
 
+
 const profileAvatarEditForm = document.forms['avatar-change']
 const profileAvatarInput = profileAvatarEditForm.elements.avatar
-
-
-const handleChangeAvatarFormSubmit = (evt) => {
-  evt.preventDefault()
-  refreshUserAvatar(profileAvatarInput.value)
-    .then((res) => {
-      profileAvatar.style.backgroundImage = `url(${res.avatar})`
-    })
-    .catch((err) => {
-console.log(err)
-    })
-
-}
-
-
-profileAvatar.addEventListener('click', () => {
-  openPopup(profileAvatarPopup)
-})
-
-
-profileAvatarEditForm.addEventListener('submit', (evt) => {
-  handleChangeAvatarFormSubmit(evt)
-  closePopup(profileAvatarPopup)
-})
-
-
 
 
 
@@ -69,14 +43,17 @@ const addNewCardForm = document.forms['new-place'];
 const addNewCardInputName = addNewCardForm.elements['place-name'];
 const addNewCardInputImage = addNewCardForm.elements.link;
 
+
 const imageViewerPopup = document.querySelector('.popup_type_image');
 const imageInPopup = imageViewerPopup.querySelector('.popup__image');
 const imageNameInPopup = imageViewerPopup.querySelector('.popup__caption');
 
+
+
 const allPopups = document.querySelectorAll('.popup');
 const allPopupCloseButtons = document.querySelectorAll('.popup__close');
 
-enableValidation(validationConfig)
+
 
 const renderUserData = (data) => {
   profileName.textContent = data.name
@@ -84,13 +61,36 @@ const renderUserData = (data) => {
   profileAvatar.style.backgroundImage = `url(${data.avatar})`
 }
 
+
 const addPreloader = (evt) => {
   evt.submitter.textContent = 'Сохранение...'
 }
 
+
 const removePreloader = (evt) => {
   evt.submitter.textContent = 'Сохранить'
 }
+
+
+const handleChangeAvatarFormSubmit = (evt) => {
+  evt.preventDefault()
+  addPreloader(evt)
+  refreshUserAvatar(profileAvatarInput.value)
+    .then((res) => {
+      profileAvatar.style.backgroundImage = `url(${res.avatar})`
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+    .finally(() => {
+      removePreloader(evt)
+      profileAvatarEditForm.reset()
+      clearValidation(profileAvatarEditForm, validationConfig)
+      closePopup(profileAvatarPopup)
+    })
+
+}
+
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
@@ -101,15 +101,18 @@ const handleProfileFormSubmit = (evt) => {
     .then((res) => {
       renderUserData(res)
     })
-    .then(() => {
-      removePreloader(evt)
-      clearValidation(profileEditForm, validationConfig)
-      profileEditForm.reset()
-    })
     .catch((err) => {
       console.log(err)
     })
+    .finally(() => {
+      removePreloader(evt)
+      clearValidation(profileEditForm, validationConfig)
+      profileEditForm.reset()
+      closePopup(profileEditPopup);
+    })
+
 }
+
 
 const handleAddCardFormSubmit = (evt) => {
   evt.preventDefault();
@@ -125,20 +128,21 @@ const handleAddCardFormSubmit = (evt) => {
       const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId);
       placesCardsList.prepend(newCard);
     })
-    .then(() => {
-      removePreloader(evt)
-
-    })
-
     .catch((err) => {
       console.log(err)
     })
+    .finally(() => {
+      removePreloader(evt)
+      closePopup(addNewCardPopup);
+    })
 };
+
 
 const fillProfileInputs = () => {
   profileNameInput.value = profileName.textContent;
   profileJobInput.value = profileJob.textContent;
 };
+
 
 const openImageInPopup = (evt) => {
   const cardImage = evt.target.closest('.card__image');
@@ -149,6 +153,7 @@ const openImageInPopup = (evt) => {
   openPopup(imageViewerPopup);
 };
 
+
 allPopupCloseButtons.forEach((closeButton) => {
   closeButton.addEventListener('click', (evt) => {
     const currentOpenPopup = evt.target.closest('.popup');
@@ -156,15 +161,26 @@ allPopupCloseButtons.forEach((closeButton) => {
   });
 });
 
+
 allPopups.forEach((popup) => {
   popup.addEventListener('mousedown', closePopupClickOnOverlay);
 });
 
+
 profileEditButton.addEventListener('click', () => {
+  profileEditForm.reset()
   clearValidation(profileEditForm, validationConfig)
   fillProfileInputs();
   openPopup(profileEditPopup);
 });
+
+
+profileAvatar.addEventListener('click', () => {
+  profileAvatarEditForm.reset()
+  clearValidation(profileAvatarEditForm, validationConfig)
+  openPopup(profileAvatarPopup)
+})
+
 
 addNewCardButton.addEventListener('click', () => {
   addNewCardForm.reset()
@@ -173,22 +189,15 @@ addNewCardButton.addEventListener('click', () => {
 
 });
 
-profileEditForm.addEventListener('submit', (evt) => {
-  handleProfileFormSubmit(evt)
-  closePopup(profileEditPopup);
-});
+profileEditForm.addEventListener('submit', handleProfileFormSubmit)
 
-addNewCardForm.addEventListener('submit', (evt) => {
-  handleAddCardFormSubmit(evt);
-  closePopup(addNewCardPopup);
+addNewCardForm.addEventListener('submit', handleAddCardFormSubmit)
 
-});
+profileAvatarEditForm.addEventListener('submit', handleChangeAvatarFormSubmit)
 
-const promises = [getUserData(), getCardsFromApi()]
 
-Promise.all(promises)
+Promise.all([getUserData(), getCardsFromApi()])
   .then(([userData, cards]) => {
-    console.log(userData.avatar)
     userId = userData._id
     cards.forEach((card) => {
       placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId));
@@ -199,5 +208,6 @@ Promise.all(promises)
     console.log(err)
   })
 
+enableValidation(validationConfig)
 
 

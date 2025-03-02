@@ -1,4 +1,4 @@
-import { deleteCardFromApi } from "./api";
+import { deleteCardFromApi, addLikeOnCard, deleteLikeOnCard } from "./api";
 
 export const placesCardsList = document.querySelector('.places__list');
 
@@ -8,8 +8,10 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   const cardImage = placesCardItem.querySelector('.card__image');
   const cardTitle = placesCardItem.querySelector('.card__title');
   const cardLikeCount = placesCardItem.querySelector('.card__like-count')
+  const cardLikeButton = placesCardItem.querySelector('.card__like-button')
   const cardDeleteButton = placesCardItem.querySelector('.card__delete-button')
   placesCardItem.dataset.id = cardItem._id
+  placesCardItem.cardLikeCount = cardLikeCount
 
   placesCardsList.addEventListener('click', cardDeleteHandler);
   cardImage.addEventListener('click', cardImageHandler);
@@ -22,8 +24,11 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   if (cardItem.owner._id !== userId) {
     cardDeleteButton.remove()
   }
-  // console.log('Айди карточки:', cardItem._id)
-  // console.log('Владелец карточки:', cardItem.owner._id)
+  cardItem.likes.filter((item) => {
+    if (item._id === userId) {
+      cardLikeButton.classList.add('card__like-button_is-active')
+    }
+  })
   return placesCardItem;
 };
 
@@ -32,6 +37,7 @@ export const deleteCard = (evt) => {
   if (evt.target.classList.contains('card__delete-button')) {
     const cardItem = evt.target.closest('.places__item')
     const cardId = cardItem.dataset.id
+    console.log(cardId)
     deleteCardFromApi(cardId)
       .then(() => {
         cardItem.remove();
@@ -41,19 +47,29 @@ export const deleteCard = (evt) => {
   }
 };
 
-
-
-// export const toggleLikeCard = (evt) => {
-//   const likeButton = evt.target.closest('.card__like-button');
-//   if (likeButton) {
-//     likeButton.classList.toggle('card__like-button_is-active');
-//   }
-// };
-
 export const toggleLikeCard = (evt) => {
-  if (evt.target.classList.contains('card__like-button')) {
-    console.log(evt.target.classList.contains('card__like-button'))
-    evt.target.classList.toggle('card__like-button_is-active');
-  }
+  const likeButton = evt.target.closest('.card__like-button');
+  const cardItem = evt.target.closest('.places__item')
+  const cardId = cardItem.dataset.id
+  const likeCountElement = cardItem.cardLikeCount
+  if (likeButton)
+    if (likeButton.classList.contains('card__like-button_is-active')) {
+      deleteLikeOnCard(cardId)
+        .then((res) => {
+          likeButton.classList.remove('card__like-button_is-active')
+          likeCountElement.textContent = res.likes.length
+        })
+        .catch((err) => console.log(err))
+
+    }
+    else {
+      addLikeOnCard(cardId)
+        .then((res) => {
+          likeButton.classList.add('card__like-button_is-active')
+          likeCountElement.textContent = res.likes.length
+        })
+        .catch((err) => console.log(err))
+
+    }
 };
 

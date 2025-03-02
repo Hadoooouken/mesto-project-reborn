@@ -1,4 +1,3 @@
-
 const config = {
   baseUrl: 'https://nomoreparties.co/v1/wff-cohort-11',
   headers: {
@@ -62,31 +61,53 @@ export const sendCardToApi = (card) => {
     })
   })
     .then(checkResponseStatus)
-  }
+}
 
-  export const deleteCardFromApi = (cardId) => {
-    return fetch(`${config.baseUrl}/cards/${cardId}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: config.headers.authorization,
-        'Content-Type': config.headers["Content-Type"]
-      },
+export const deleteCardFromApi = (cardId) => {
+  return fetch(`${config.baseUrl}/cards/${cardId}`, {
+    method: 'DELETE',
+    headers: {
+      authorization: config.headers.authorization,
+      'Content-Type': config.headers["Content-Type"]
+    },
+  })
+    .then(checkResponseStatus)
+}
+
+export const refreshUserAvatar = (url) => {
+  return fetch(`${config.baseUrl}/users/me/avatar`, {
+    method: 'PATCH',
+    headers: {
+      authorization: config.headers.authorization,
+      'Content-Type': config.headers["Content-Type"]
+    },
+    body: JSON.stringify({
+      avatar: url
     })
-      .then(checkResponseStatus)
-    }
+  })
+    .then(checkResponseStatus)
+}
 
-    export const refreshUserAvatar = (url) => {
-      return fetch(`${config.baseUrl}/users/me/avatar`, {
-        method: 'PATCH',
-        headers: {
-          authorization: config.headers.authorization,
-          'Content-Type': config.headers["Content-Type"]
-        },
-        body: JSON.stringify({
-         avatar: url
-        })
-      })
-        .then(checkResponseStatus)
-    }
-    
-   
+export const addLikeOnCard = (cardId) => {
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+    method: 'PUT',
+    headers: {
+      authorization: config.headers.authorization,
+      'Content-Type': config.headers["Content-Type"]
+    },
+  })
+    .then(checkResponseStatus)
+}
+
+export const deleteLikeOnCard = (cardId) => {
+  return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
+    method: 'DELETE',
+    headers: {
+      authorization: config.headers.authorization,
+      'Content-Type': config.headers["Content-Type"]
+    },
+  })
+    .then(checkResponseStatus)
+}
+
+

@@ -9,9 +9,9 @@ const config = {
 
 const checkResponseStatus = (res) => {
   if (res.ok) {
-   
+
     return res.json();
-   
+
   }
   return Promise.reject(`Ошибка: ${res.status}`);
 }
@@ -34,26 +34,6 @@ export const getUserData = () => {
     .then(checkResponseStatus)
 }
 
-
-// export const refreshUserData = () => {
-//  return fetch(`${config.baseUrl}/users/me`, {
-//     method: 'PATCH',
-//     headers: {
-//       authorization: config.headers.authorization,
-//       'Content-Type': config.headers["Content-Type"]
-//     },
-//     body: JSON.stringify({
-//       name: 'Marie Skłodowska Curie',
-//       about: 'Physicist and Chemist'
-//     })
-//   })
-//     .then(console.log(checkResponseStatus))
-//     .then((data) => {
-//       console.log("Ответ от сервера:", data);
-//       return data;
-//     })
-// } 
-
 export const refreshUserData = (name, job) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: 'PATCH',
@@ -66,7 +46,47 @@ export const refreshUserData = (name, job) => {
       about: job
     })
   })
-    .then(checkResponseStatus) 
-
+    .then(checkResponseStatus)
 }
 
+export const sendCardToApi = (card) => {
+  return fetch(`${config.baseUrl}/cards`, {
+    method: 'POST',
+    headers: {
+      authorization: config.headers.authorization,
+      'Content-Type': config.headers["Content-Type"]
+    },
+    body: JSON.stringify({
+      name: card.name,
+      link: card.link
+    })
+  })
+    .then(checkResponseStatus)
+  }
+
+  export const deleteCardFromApi = (cardId) => {
+    return fetch(`${config.baseUrl}/cards/${cardId}`, {
+      method: 'DELETE',
+      headers: {
+        authorization: config.headers.authorization,
+        'Content-Type': config.headers["Content-Type"]
+      },
+    })
+      .then(checkResponseStatus)
+    }
+
+    export const refreshUserAvatar = (url) => {
+      return fetch(`${config.baseUrl}/users/me/avatar`, {
+        method: 'PATCH',
+        headers: {
+          authorization: config.headers.authorization,
+          'Content-Type': config.headers["Content-Type"]
+        },
+        body: JSON.stringify({
+         avatar: url
+        })
+      })
+        .then(checkResponseStatus)
+    }
+    
+   

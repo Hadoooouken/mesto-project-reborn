@@ -1,13 +1,12 @@
 import '../src/index.css';
 import { createCard, deleteCard, toggleLikeCard, placesCardsList } from './components/cards';
-import { initialCards } from './components/initialCardsMockData';
 import { closePopup, closePopupClickOnOverlay, openPopup } from './components/modal';
-import avatar from '../images/avatar.jpg';
+
 import { clearValidation, enableValidation } from './components/validation';
-import { getCardsFromApi, getUserData, refreshUserData } from './components/api';
+import { getCardsFromApi, getUserData, refreshUserData, sendCardToApi, refreshUserAvatar } from './components/api';
 
 
-
+let userId = null
 
 
 
@@ -22,10 +21,6 @@ const validationConfig = {
 
 
 
-
-const profileImage = document.querySelector('.profile__image');
-profileImage.style.backgroundImage = `url(${avatar})`;
-
 const profileEditPopup = document.querySelector('.popup_type_edit');
 const profileEditButton = document.querySelector('.profile__edit-button');
 const profileEditForm = document.forms['edit-profile'];
@@ -33,6 +28,40 @@ const profileNameInput = profileEditForm.elements.name;
 const profileJobInput = profileEditForm.elements.description;
 const profileName = document.querySelector('.profile__title');
 const profileJob = document.querySelector('.profile__description');
+const profileAvatar = document.querySelector('.profile__image');
+const profileAvatarPopup = document.querySelector('.popup_avatar_changed')
+
+
+const profileAvatarEditForm = document.forms['avatar-change']
+const profileAvatarInput = profileAvatarEditForm.elements.avatar
+
+
+const handleChangeAvatarFormSubmit = (evt) => {
+  evt.preventDefault()
+  refreshUserAvatar(profileAvatarInput.value)
+    .then((res) => {
+      profileAvatar.style.backgroundImage = `url(${res.avatar})`
+    })
+    .catch((err) => {
+console.log(err)
+    })
+
+}
+
+
+profileAvatar.addEventListener('click', () => {
+  openPopup(profileAvatarPopup)
+})
+
+
+profileAvatarEditForm.addEventListener('submit', (evt) => {
+  handleChangeAvatarFormSubmit(evt)
+  closePopup(profileAvatarPopup)
+})
+
+
+
+
 
 const addNewCardPopup = document.querySelector('.popup_type_new-card');
 const addNewCardButton = document.querySelector('.profile__add-button');
@@ -52,21 +81,35 @@ enableValidation(validationConfig)
 const renderUserData = (data) => {
   profileName.textContent = data.name
   profileJob.textContent = data.about
+  profileAvatar.style.backgroundImage = `url(${data.avatar})`
 }
 
+const addPreloader = (evt) => {
+  evt.submitter.textContent = 'Сохранение...'
+}
+
+const removePreloader = (evt) => {
+  evt.submitter.textContent = 'Сохранить'
+}
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
   const nameValue = profileNameInput.value;
   const jobValue = profileJobInput.value;
+  addPreloader(evt)
   refreshUserData(nameValue, jobValue)
     .then((res) => {
       renderUserData(res)
-    }).catch((err) => {
+    })
+    .then(() => {
+      removePreloader(evt)
+      clearValidation(profileEditForm, validationConfig)
+      profileEditForm.reset()
+    })
+    .catch((err) => {
       console.log(err)
     })
 }
-
 
 const handleAddCardFormSubmit = (evt) => {
   evt.preventDefault();
@@ -76,9 +119,20 @@ const handleAddCardFormSubmit = (evt) => {
     name: cardNameValue,
     link: cardImageValue,
   };
-  const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard);
+  addPreloader(evt)
+  sendCardToApi(card)
+    .then((card) => {
+      const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId);
+      placesCardsList.prepend(newCard);
+    })
+    .then(() => {
+      removePreloader(evt)
 
-  placesCardsList.prepend(newCard);
+    })
+
+    .catch((err) => {
+      console.log(err)
+    })
 };
 
 const fillProfileInputs = () => {
@@ -94,7 +148,6 @@ const openImageInPopup = (evt) => {
   imageNameInPopup.textContent = cardImage.alt;
   openPopup(imageViewerPopup);
 };
-
 
 allPopupCloseButtons.forEach((closeButton) => {
   closeButton.addEventListener('click', (evt) => {
@@ -114,8 +167,8 @@ profileEditButton.addEventListener('click', () => {
 });
 
 addNewCardButton.addEventListener('click', () => {
-  clearValidation(addNewCardForm, validationConfig)
   addNewCardForm.reset()
+  clearValidation(addNewCardForm, validationConfig)
   openPopup(addNewCardPopup)
 
 });
@@ -135,16 +188,16 @@ const promises = [getUserData(), getCardsFromApi()]
 
 Promise.all(promises)
   .then(([userData, cards]) => {
+    console.log(userData.avatar)
+    userId = userData._id
     cards.forEach((card) => {
-      placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard));
+      placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId));
     })
     renderUserData(userData)
   })
   .catch((err) => {
     console.log(err)
   })
-
-
 
 
 

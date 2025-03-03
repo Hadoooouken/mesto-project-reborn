@@ -209,5 +209,3 @@ Promise.all([getUserData(), getCardsFromApi()])
   })
 
 enableValidation(validationConfig)
-
-

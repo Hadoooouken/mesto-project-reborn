@@ -48,10 +48,14 @@ export const deleteCard = (evt) => {
 };
 
 export const toggleLikeCard = (evt) => {
+  console.log(evt.target)
   const likeButton = evt.target.closest('.card__like-button');
   const cardItem = evt.target.closest('.places__item')
+  if (!cardItem) return
   const cardId = cardItem.dataset.id
+
   const likeCountElement = cardItem.cardLikeCount
+
   if (likeButton)
     if (likeButton.classList.contains('card__like-button_is-active')) {
       deleteLikeOnCard(cardId)

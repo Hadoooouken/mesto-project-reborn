@@ -11,11 +11,10 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   const cardLikeButton = placesCardItem.querySelector('.card__like-button')
   const cardDeleteButton = placesCardItem.querySelector('.card__delete-button')
   placesCardItem.dataset.id = cardItem._id
-  placesCardItem.cardLikeCount = cardLikeCount
 
-  placesCardsList.addEventListener('click', cardDeleteHandler);
+  cardDeleteButton.addEventListener('click', cardDeleteHandler);
   cardImage.addEventListener('click', cardImageHandler);
-  placesCardsList.addEventListener('click', cardLikeHandler);
+  cardLikeButton.addEventListener('click', cardLikeHandler);
 
   cardImage.src = cardItem.link;
   cardImage.alt = cardItem.name;
@@ -24,11 +23,9 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   if (cardItem.owner._id !== userId) {
     cardDeleteButton.remove()
   }
-  cardItem.likes.filter((item) => {
-    if (item._id === userId) {
-      cardLikeButton.classList.add('card__like-button_is-active')
-    }
-  })
+  if (cardItem.likes.some(item => item._id === userId)) {
+    cardLikeButton.classList.add('card__like-button_is-active')
+  }
   return placesCardItem;
 };
 
@@ -37,7 +34,6 @@ export const deleteCard = (evt) => {
   if (evt.target.classList.contains('card__delete-button')) {
     const cardItem = evt.target.closest('.places__item')
     const cardId = cardItem.dataset.id
-    console.log(cardId)
     deleteCardFromApi(cardId)
       .then(() => {
         cardItem.remove();
@@ -48,32 +44,46 @@ export const deleteCard = (evt) => {
 };
 
 export const toggleLikeCard = (evt) => {
-  console.log(evt.target)
-  const likeButton = evt.target.closest('.card__like-button');
   const cardItem = evt.target.closest('.places__item')
-  if (!cardItem) return
+  const cardLikeButton = evt.target.closest('.card__like-button');
+  const cardLikeCount = cardItem.querySelector('.card__like-count')
   const cardId = cardItem.dataset.id
+  const likeApiMethod = cardLikeButton.classList.contains('card__like-button_is-active')
+    ? deleteLikeOnCard
+    : addLikeOnCard;
 
-  const likeCountElement = cardItem.cardLikeCount
+  likeApiMethod(cardId)
+    .then((res) => {
+      cardLikeButton.classList.toggle('card__like-button_is-active');
+      cardLikeCount.textContent = res.likes.length;
+    })
+    .catch((err) => console.log(err));
+}
 
-  if (likeButton)
-    if (likeButton.classList.contains('card__like-button_is-active')) {
-      deleteLikeOnCard(cardId)
-        .then((res) => {
-          likeButton.classList.remove('card__like-button_is-active')
-          likeCountElement.textContent = res.likes.length
-        })
-        .catch((err) => console.log(err))
 
-    }
-    else {
-      addLikeOnCard(cardId)
-        .then((res) => {
-          likeButton.classList.add('card__like-button_is-active')
-          likeCountElement.textContent = res.likes.length
-        })
-        .catch((err) => console.log(err))
 
-    }
-};
+
+
+
+
+//   if (likeButton)
+//     if (likeButton.classList.contains('card__like-button_is-active')) {
+//       deleteLikeOnCard(cardId)
+//         .then((res) => {
+//           likeButton.classList.remove('card__like-button_is-active')
+//           likeCountElement.textContent = res.likes.length
+//         })
+//         .catch((err) => console.log(err))
+
+//     }
+//     else {
+//       addLikeOnCard(cardId)
+//         .then((res) => {
+//           likeButton.classList.add('card__like-button_is-active')
+//           likeCountElement.textContent = res.likes.length
+//         })
+//         .catch((err) => console.log(err))
+
+//     }
+// };
 

@@ -18,6 +18,10 @@ const validationConfig = {
 };
 
 
+const addCardToDOM = (card, method) => {
+  const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId);
+  placesCardsList[method](newCard);
+};
 
 
 const profileEditPopup = document.querySelector('.popup_type_edit');
@@ -125,8 +129,7 @@ const handleAddCardFormSubmit = (evt) => {
   addPreloader(evt)
   sendCardToApi(card)
     .then((card) => {
-      const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId);
-      placesCardsList.prepend(newCard);
+      addCardToDOM(card, 'prepend')
     })
     .catch((err) => {
       console.log(err)
@@ -145,10 +148,12 @@ const fillProfileInputs = () => {
 
 
 const openImageInPopup = (evt) => {
+
+
   const cardImage = evt.target.closest('.card__image');
 
   imageInPopup.src = cardImage.src;
-  imageInPopup.name = cardImage.alt;
+  imageInPopup.alt = cardImage.alt;
   imageNameInPopup.textContent = cardImage.alt;
   openPopup(imageViewerPopup);
 };
@@ -200,7 +205,7 @@ Promise.all([getUserData(), getCardsFromApi()])
   .then(([userData, cards]) => {
     userId = userData._id
     cards.forEach((card) => {
-      placesCardsList.append(createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId));
+      addCardToDOM(card, 'append')
     })
     renderUserData(userData)
   })

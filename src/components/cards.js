@@ -10,9 +10,13 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   const cardLikeCount = placesCardItem.querySelector('.card__like-count')
   const cardLikeButton = placesCardItem.querySelector('.card__like-button')
   const cardDeleteButton = placesCardItem.querySelector('.card__delete-button')
-  placesCardItem.dataset.id = cardItem._id
-
-  cardDeleteButton.addEventListener('click', cardDeleteHandler);
+  
+  placesCardItem.setAttribute('id', cardItem._id)
+  const cardId = placesCardItem.getAttribute('id')
+ 
+  cardDeleteButton.addEventListener('click', () => {
+    cardDeleteHandler(cardId)
+  });
   cardImage.addEventListener('click', cardImageHandler);
   cardLikeButton.addEventListener('click', cardLikeHandler);
 
@@ -29,25 +33,14 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   return placesCardItem;
 };
 
-export const deleteCard = (evt) => {
 
-  if (evt.target.classList.contains('card__delete-button')) {
-    const cardItem = evt.target.closest('.places__item')
-    const cardId = cardItem.dataset.id
-    deleteCardFromApi(cardId)
-      .then(() => {
-        cardItem.remove();
-      })
-      .catch((err) => console.log(err))
 
-  }
-};
 
 export const toggleLikeCard = (evt) => {
   const cardItem = evt.target.closest('.places__item')
   const cardLikeButton = evt.target.closest('.card__like-button');
   const cardLikeCount = cardItem.querySelector('.card__like-count')
-  const cardId = cardItem.dataset.id
+  const cardId = cardItem.id
   const likeApiMethod = cardLikeButton.classList.contains('card__like-button_is-active')
     ? deleteLikeOnCard
     : addLikeOnCard;

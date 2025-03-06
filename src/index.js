@@ -1,11 +1,12 @@
 import '../src/index.css';
-import { createCard, deleteCard, toggleLikeCard, placesCardsList } from './components/cards';
+import { createCard, toggleLikeCard, placesCardsList } from './components/cards';
 import { closePopup, closePopupClickOnOverlay, openPopup } from './components/modal';
 
 import { clearValidation, enableValidation } from './components/validation';
-import { getCardsFromApi, getUserData, refreshUserData, sendCardToApi, refreshUserAvatar } from './components/api';
+import { getCardsFromApi, getUserData, refreshUserData, sendCardToApi, refreshUserAvatar, deleteCardFromApi } from './components/api';
 
 let userId = null
+
 
 
 const validationConfig = {
@@ -17,11 +18,6 @@ const validationConfig = {
   errorClass: 'form__input-error_active'
 };
 
-
-const addCardToDOM = (card, method) => {
-  const newCard = createCard(card, deleteCard, openImageInPopup, toggleLikeCard, userId);
-  placesCardsList[method](newCard);
-};
 
 
 const profileEditPopup = document.querySelector('.popup_type_edit');
@@ -48,6 +44,7 @@ const addNewCardInputName = addNewCardForm.elements['place-name'];
 const addNewCardInputImage = addNewCardForm.elements.link;
 
 
+
 const imageViewerPopup = document.querySelector('.popup_type_image');
 const imageInPopup = imageViewerPopup.querySelector('.popup__image');
 const imageNameInPopup = imageViewerPopup.querySelector('.popup__caption');
@@ -57,6 +54,23 @@ const imageNameInPopup = imageViewerPopup.querySelector('.popup__caption');
 const allPopups = document.querySelectorAll('.popup');
 const allPopupCloseButtons = document.querySelectorAll('.popup__close');
 
+
+
+const popupRemove = document.querySelector('.popup_card__remove')
+const cardRemoveForm = document.forms['delete-card']
+
+
+
+const prepateTodeleteCard = (id) => {
+  cardRemoveForm.setAttribute('id', id)
+  openPopup(popupRemove);
+};
+
+
+const addCardToDOM = (card, method) => {
+  const newCard = createCard(card, prepateTodeleteCard, openImageInPopup, toggleLikeCard, userId);
+  placesCardsList[method](newCard);
+};
 
 
 const renderUserData = (data) => {
@@ -148,10 +162,7 @@ const fillProfileInputs = () => {
 
 
 const openImageInPopup = (evt) => {
-
-
   const cardImage = evt.target.closest('.card__image');
-
   imageInPopup.src = cardImage.src;
   imageInPopup.alt = cardImage.alt;
   imageNameInPopup.textContent = cardImage.alt;
@@ -191,6 +202,26 @@ addNewCardButton.addEventListener('click', () => {
   addNewCardForm.reset()
   clearValidation(addNewCardForm, validationConfig)
   openPopup(addNewCardPopup)
+
+});
+
+cardRemoveForm.addEventListener('submit', (evt) => {
+  evt.preventDefault();
+  const cardId = cardRemoveForm.getAttribute('id')
+  const cardItem = document.getElementById(cardId)
+  evt.submitter.textContent = 'Удаление'
+  deleteCardFromApi(cardId)
+    .then(() => {
+      cardItem.remove()
+      closePopup(popupRemove)
+
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+    .finally(() => {
+      evt.submitter.textContent = 'Да'
+    })
 
 });
 

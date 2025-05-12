@@ -17,18 +17,14 @@ const checkResponseStatus = (res) => {
 
 export const getCardsFromApi = () => {
   return fetch(`${config.baseUrl}/cards`, {
-    headers: {
-      authorization: config.headers.authorization
-    }
+    headers: config.headers
   })
     .then(checkResponseStatus)
 }
 
 export const getUserData = () => {
   return fetch(`${config.baseUrl}/users/me`, {
-    headers: {
-      authorization: config.headers.authorization
-    }
+    headers: config.headers
   })
     .then(checkResponseStatus)
 }
@@ -36,10 +32,7 @@ export const getUserData = () => {
 export const refreshUserData = (name, job) => {
   return fetch(`${config.baseUrl}/users/me`, {
     method: 'PATCH',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
     body: JSON.stringify({
       name: name,
       about: job
@@ -51,10 +44,7 @@ export const refreshUserData = (name, job) => {
 export const sendCardToApi = (card) => {
   return fetch(`${config.baseUrl}/cards`, {
     method: 'POST',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
     body: JSON.stringify({
       name: card.name,
       link: card.link
@@ -66,10 +56,7 @@ export const sendCardToApi = (card) => {
 export const deleteCardFromApi = (cardId) => {
   return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: 'DELETE',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
   })
     .then(checkResponseStatus)
 }
@@ -77,10 +64,7 @@ export const deleteCardFromApi = (cardId) => {
 export const refreshUserAvatar = (url) => {
   return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: 'PATCH',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
     body: JSON.stringify({
       avatar: url
     })
@@ -91,10 +75,7 @@ export const refreshUserAvatar = (url) => {
 export const addLikeOnCard = (cardId) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'PUT',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
   })
     .then(checkResponseStatus)
 }
@@ -102,10 +83,7 @@ export const addLikeOnCard = (cardId) => {
 export const deleteLikeOnCard = (cardId) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardId}`, {
     method: 'DELETE',
-    headers: {
-      authorization: config.headers.authorization,
-      'Content-Type': config.headers["Content-Type"]
-    },
+    headers: config.headers,
   })
     .then(checkResponseStatus)
 }

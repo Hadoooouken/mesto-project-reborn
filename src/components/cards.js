@@ -1,4 +1,4 @@
-import { deleteCardFromApi, addLikeOnCard, deleteLikeOnCard } from "./api";
+import { addLikeOnCard, deleteLikeOnCard } from "./api";
 
 export const placesCardsList = document.querySelector('.places__list');
 
@@ -10,10 +10,10 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   const cardLikeCount = placesCardItem.querySelector('.card__like-count')
   const cardLikeButton = placesCardItem.querySelector('.card__like-button')
   const cardDeleteButton = placesCardItem.querySelector('.card__delete-button')
-  
+
   placesCardItem.setAttribute('id', cardItem._id)
   const cardId = placesCardItem.getAttribute('id')
- 
+
   cardDeleteButton.addEventListener('click', () => {
     cardDeleteHandler(cardId)
   });
@@ -33,9 +33,6 @@ export const createCard = (cardItem, cardDeleteHandler, cardImageHandler, cardLi
   return placesCardItem;
 };
 
-
-
-
 export const toggleLikeCard = (evt) => {
   const cardItem = evt.target.closest('.places__item')
   const cardLikeButton = evt.target.closest('.card__like-button');
@@ -52,12 +49,6 @@ export const toggleLikeCard = (evt) => {
     })
     .catch((err) => console.log(err));
 }
-
-
-
-
-
-
 
 //   if (likeButton)
 //     if (likeButton.classList.contains('card__like-button_is-active')) {

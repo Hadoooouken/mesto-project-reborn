@@ -61,14 +61,14 @@ const cardRemoveForm = document.forms['delete-card']
 
 
 
-const prepateTodeleteCard = (id) => {
+const prepareTodeleteCard = (id) => {
   cardRemoveForm.setAttribute('id', id)
   openPopup(popupRemove);
 };
 
 
 const addCardToDOM = (card, method) => {
-  const newCard = createCard(card, prepateTodeleteCard, openImageInPopup, toggleLikeCard, userId);
+  const newCard = createCard(card, prepareTodeleteCard, openImageInPopup, toggleLikeCard, userId);
   placesCardsList[method](newCard);
 };
 
@@ -245,3 +245,5 @@ Promise.all([getUserData(), getCardsFromApi()])
   })
 
 enableValidation(validationConfig)
+
+console.log(document.cookie)

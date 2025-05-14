@@ -38,9 +38,9 @@ export const toggleLikeCard = (evt) => {
   const cardLikeButton = evt.target.closest('.card__like-button');
   const cardLikeCount = cardItem.querySelector('.card__like-count')
   const cardId = cardItem.id
-  const likeApiMethod = cardLikeButton.classList.contains('card__like-button_is-active')
-    ? deleteLikeOnCard
-    : addLikeOnCard;
+  const likeApiMethod = cardLikeButton.classList.contains('card__like-button_is-active') 
+  ? deleteLikeOnCard : addLikeOnCard;
+  // console.log(likeApiMethod)
 
   likeApiMethod(cardId)
     .then((res) => {

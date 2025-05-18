@@ -20,9 +20,9 @@ Git — контроль версий
 
 Установка и запуск
 Клонируйте репозиторий:
+
 git clone https://github.com/Hadoooouken/mesto-project-reborn.git
-Перейдите в директорию проекта:
-cd mesto-project-reborn
+
 Установите зависимости:
 
 npm install
